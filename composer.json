@@ -21,9 +21,7 @@
     },
     "autoload": {
     	"psr-4": {
-            "yolk\\Yolk": "src/",
-            "yolk\\core\\": "src/core",
-            "yolk\\helpers\\": "src/helpers"
+            "yolk\\": "src/"
         }
     }
 }
