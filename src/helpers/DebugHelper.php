@@ -11,6 +11,8 @@
 
 namespace yolk\helpers;
 
+use yolk\Yolk;
+
 class DebugHelper {
 
 	/**
@@ -54,7 +56,7 @@ class DebugHelper {
 	 * @param mixed    $var
 	 * @param boolean  $echo   if false the function will return the output as a string
 	 */
-	public static function dump( $var, $echo = true ) {
+	public static function dump_old( $var, $echo = true ) {
 
 		if( !Yolk::isDebug() )
 			return '';

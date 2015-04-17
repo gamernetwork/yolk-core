@@ -18,10 +18,6 @@ class ArrayHelper {
 	 */
 	private function __construct() {}
 
-	public static function shutdown() {
-		echo "\\o/";
-	}
-
 	/**
 	 * Convert a variable into an array of unique integer values.
 	 *
