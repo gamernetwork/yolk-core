@@ -27,7 +27,7 @@ class Yolk {
 	 * Current error handler.
 	 * @var array|\Closure
 	 */
-	protected static $error_handler = array(__CLASS__, 'error');
+	protected static $error_handler = [__CLASS__, 'error'];
 
 	protected static $exception_handler;
 
@@ -102,7 +102,7 @@ class Yolk {
 		try {
 
 			// catch fatal errors
-			register_shutdown_function(array(__CLASS__, 'shutdown'));
+			register_shutdown_function([__CLASS__, 'shutdown']);
 
 			// set an error handler
 			$error_handler = set_error_handler(static::$error_handler);
@@ -159,10 +159,8 @@ class Yolk {
 
 	public static function dump( $var, $format = null, $die = false ) {
 
-		$format = static::DUMP_TEXT;
-
 		switch( $format ) {
-			case null:
+			/*case null:
 				$format = static::isCLI() ? static::DUMP_TERMINAL : static::DUMP_HTML;
 				// fall through now we've selected an appropriate format
 			case static::DUMP_HTML:
@@ -170,7 +168,7 @@ class Yolk {
 				break;
 			case static::DUMP_TERMINAL:
 				$dumper = '\\yolk\\debug\\TerminalDumper';
-				break;
+				break;*/
 			case static::DUMP_TEXT:
 			default:
 				$dumper = '\\yolk\\debug\\TextDumper';
@@ -246,7 +244,6 @@ class Yolk {
 		if( $handler = static::$exception_handler )
 			return call_user_func($handler, $error);
 		
-		$debug = static::isDebug();
 		$fatal = ($error instanceof \ErrorException) && ($error->getSeverity() & (E_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR));
 
 		// fatal errors will already have been error_log()'d
@@ -259,14 +256,16 @@ class Yolk {
 			error_log(get_class($error). ': '. $error->getMessage(). " [{$location}]");
 		}
 
-		// if we're running in a web environment then output the error page
-		if( !static::isCLI() ) {
-			if( !headers_sent() )
-				header("HTTP/1.0 500 Internal Server Error");
-			require static::$error_page ?: __DIR__. '/core/Exception.view.php';
-		}
-		elseif( $debug ) {
+		if( static::isCLI() ) {
 			static::dump($error);
+		}
+		// debug web app
+		elseif( static::isDebug() ) {
+			require __DIR__. '/exceptions/error.debug.php';
+		}
+		// production web app
+		else {
+			require static::$error_page ?: __DIR__. '/exceptions/error.php';;
 		}
 
 	}
