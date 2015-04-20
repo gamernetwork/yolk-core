@@ -85,10 +85,9 @@ class ArrayHelper {
 	 */
 	public static function get( $var, $key, $default = null ) {
 
-		if( !$key )
-			throw new \InvalidArgumentException('Missing value for $key argument');
-
-		if( isset($var->$key) )
+		if( $key === null )
+			return $var;
+		elseif( isset($var->$key) )
 			return $var->$key;
 		elseif( isset($var[$key]) )
 			return $var[$key];

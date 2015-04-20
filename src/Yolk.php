@@ -11,6 +11,12 @@
 
 namespace yolk;
 
+// global helper functions (e.g. d() and dd())
+require __DIR__.'/bootstrap.php';
+
+Yolk::registerHelpers('yolk\\helpers\\ArrayHelper');
+Yolk::registerHelpers('yolk\\helpers\\StringHelper');
+
 class Yolk {
 
 	const DUMP_TEXT     = 'text';
@@ -157,7 +163,7 @@ class Yolk {
 
 	}
 
-	public static function dump( $var, $format = null, $die = false ) {
+	public static function dump( $var, $format = null ) {
 
 		switch( $format ) {
 			/*case null:
@@ -176,8 +182,6 @@ class Yolk {
 		}
 
 		$dumper::dump($var);
-
-		$die && die();
 
 	}
 
