@@ -261,7 +261,7 @@ class Yolk {
 		}
 
 		if( static::isCLI() ) {
-			static::dump($error);
+			static::isDebug() && static::dump($error);
 		}
 		// debug web app
 		elseif( static::isDebug() ) {
