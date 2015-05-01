@@ -44,11 +44,10 @@ class Handler {
 
 		// fatal errors will already have been error_log()'d
 		if( !static::isFatal($error) ) {
+			$location = $error->getFile(). ':'. $error->getLine();
 			// type hinting error - make sure we give the correct location
 			if( ($error instanceof \InvalidArgumentException) && ($error->getPrevious() instanceof \ErrorException) )
 				$location = $error->getPrevious()->getFile(). ':'. $error->getPrevious()->getLine();
-			else
-				$location = $error->getFile(). ':'. $error->getLine();
 			error_log(get_class($error). ': '. $error->getMessage(). " [{$location}]");
 		}
 
@@ -78,9 +77,9 @@ class Handler {
 	}
 
 	/**
-	 * Determine if an error code or ErrorException is a fatal error.
-	 * @param  [type]  $error [description]
-	 * @return boolean        [description]
+	 * Determine if an error code or Exception is a fatal error.
+	 * @param  \Exception|integer  $error
+	 * @return boolean
 	 */
 	protected static function isFatal( $error ) {
 

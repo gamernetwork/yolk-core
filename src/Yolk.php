@@ -191,14 +191,7 @@ class Yolk {
 	 * @return void
 	 */
 	public static function setErrorHandler( callable $handler = null ) {
-
-		if( !$handler )
-			$handler = ['\\yolk\\exceptions\\Handler', 'error'];
-
-		if( !is_callable($handler) )
-			throw new \InvalidArgumentException("Specified error handler is not callable.");
-
-		static::$error_handler = $handler;
+		static::$error_handler = $handler ?: ['\\yolk\\exceptions\\Handler', 'error'];
 
 	}
 
@@ -208,14 +201,7 @@ class Yolk {
 	 * @return void
 	 */
 	public static function setExceptionHandler( callable $handler = null ) {
-		
-		if( !$handler )
-			$handler = ['\\yolk\\exceptions\\Handler', 'exception'];
-
-		if( !is_callable($handler) )
-			throw new \InvalidArgumentException("Specified exception handler is not callable.");
-
-		static::$exception_handler = $handler;
+		static::$exception_handler = $handler ?: ['\\yolk\\exceptions\\Handler', 'exception'];
 
 	}
 

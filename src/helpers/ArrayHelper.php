@@ -115,10 +115,10 @@ class ArrayHelper {
 	 */
 	public static function pluck( $vars, $field, $preserve_keys = true ) {
 		$values = [];
-	    foreach( $vars as $k => $v ) {
-	    	$values[$k] = static::get($v, $field);
-	    }
-	    return $preserve_keys ? $values : array_values($values);
+		foreach( $vars as $k => $v ) {
+			$values[$k] = static::get($v, $field);
+		}
+		return $preserve_keys ? $values : array_values($values);
 	}
 
 	/**
