@@ -39,7 +39,6 @@ class Yolk {
 
 	protected static $error_page;
 
-	//protected static $helpers = ['isassoc' => ['sss', 'bfbgf']];
 	protected static $helpers = [];
 
 	/**

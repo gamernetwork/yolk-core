@@ -85,7 +85,7 @@ class TextDumper extends AbstractDumper {
 			'code'     => $e->getCode(),
 			'file'     => $e->getFile(),
 			'line'     => $e->getLine(),
-			'trace'    => [],
+			'trace'    => static::dumpTrace($e->getTrace()),
 			'previous' => $e->getPrevious(),
 		];
 
@@ -112,21 +112,6 @@ class TextDumper extends AbstractDumper {
 			], $meta);
 		}
 
-		foreach( $e->getTrace() as $i => $frame ) {
-			$line = '';
-			isset($frame['class']) && $line .= $frame['class']. $frame['type'];
-			$line .= $frame['function']. '()';
-
-			if( isset($frame['file']) ) {
-				$line .= ' ['. $frame['file'];
-				if( isset($frame['line']) )
-					$line .= ':'. $frame['line'];
-				$line .= ']';
-			}
-
-			$meta['trace'][] = $line;
-		}
-
 		$item .= static::dumpMeta($meta);
 
 		return $item;
@@ -143,19 +128,17 @@ class TextDumper extends AbstractDumper {
 		// try and get some additional info about the resource
 		switch( $type ) {
 			case 'stream':
-            	$meta = stream_get_meta_data($resource);
+				$item .= static::dumpMeta(
+					stream_get_meta_data($resource)
+				);
 				break;
 
 			case 'curl':
-            	$meta = curl_getinfo($resource);
+				$item .= static::dumpMeta(
+					curl_getinfo($resource)
+				);
 				break;
 
-			default:
-				$meta = [];
-		}
-
-		if( $meta ) {
-			$item .= static::dumpMeta($meta);
 		}
 
 		return $item;
@@ -180,43 +163,46 @@ class TextDumper extends AbstractDumper {
 
 	}
 
-	protected static function getProperties( \ReflectionClass $r, $obj ) {
-		
-		$data = [
-			/*'public'    => [],
-			'protected' => [],
-			'private'   => [],*/
-		];
+	protected static function dumpTrace( array $trace ) {
 
-		foreach( $r->getProperties() as $p ) {
+		$lines = [];
 
-			$p->setAccessible(true);
-			$v = $p->getValue($obj);
+		foreach( $trace as $i => $frame ) {
 
-				$data[$p->name] = $v;
-				continue;
+			$line = '';
 
-			if( $p->isPublic() )
-				$data['+'. $p->name] = $v;
+			if( isset($frame['class']) )
+				$line .= $frame['class']. $frame['type'];
 
-			elseif( $p->isProtected() )
-				$data['#'. $p->name] = $v;
+			$line .= $frame['function']. '()';
 
-			elseif( $p->isPrivate() ) 
-				$data['-'. $p->name] = $v;
+			if( isset($frame['file']) ) {
+				$line .= ' ['. $frame['file'];
+				if( isset($frame['line']) )
+					$line .= ':'. $frame['line'];
+				$line .= ']';
+			}
+
+			$lines[] = $line;
 
 		}
 
-		return $data;
+		return $lines;
 
 	}
 
-	protected static function getProtectedProperties( \ReflectionClass $r, object $obj ) {
+	protected static function getProperties( \ReflectionClass $r, $obj ) {
 		
-	}
+		$properties = [];
 
-	protected static function getPrivateProperties( \ReflectionClass $r, object $obj ) {
-		
+		foreach( $r->getProperties() as $p ) {
+			$p->setAccessible(true);
+			$v = $p->getValue($obj);
+			$properties[$p->name] = $v;
+		}
+
+		return $properties;
+
 	}
 
 }
