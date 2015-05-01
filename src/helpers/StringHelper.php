@@ -373,15 +373,15 @@ class StringHelper {
 	 * and replace the associated regex components with \s instead.
 	 * Also added a couple of other tags to the really bad list.
 	 * Handles most of the XSS vectors listed at http://ha.ckers.org/xss.html
-	 * @param  string   str
-	 * @return string
+	 * @param  string|array   str
+	 * @return string|array
 	 */
 	public static function xssClean( $str, $charset = 'UTF-8' ) {
 
 		if( !$str )
 			return $str;
 
-		if( is_array( $str ) ) {
+		if( is_array($str) ) {
 			foreach( $str as &$item ) {
 				$item = static::xssClean($item);
 			}
@@ -435,12 +435,12 @@ class StringHelper {
 
 	/**
 	 * Remove every control character except newline (10/x0A) carriage return (13/x0D), and horizontal tab (09/x09)
-	 * @param  string   str
-	 * @return string
+	 * @param  string|array   str
+	 * @return string|array
 	 */
 	public static function stripControlChars( $str ) {
 
-		if( is_array( $str ) ) {
+		if( is_array($str) ) {
 			foreach( $str as &$item ) {
 				$item = static::stripControlChars($item);
 			}

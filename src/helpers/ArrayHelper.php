@@ -78,7 +78,7 @@ class ArrayHelper {
 
 	/**
 	 * Return value of the specified key from an array or object or a default if the key isn't set.
-	 * @param  array|object   $data
+	 * @param  array|object   $var
 	 * @param  string|integer $key
 	 * @param  mixed          $default
 	 * @return mixed
@@ -108,22 +108,17 @@ class ArrayHelper {
 	/**
 	 * Extract a single field from an array of arrays or objects.
 	 *
-	 * @param  array   $vars            An array
+	 * @param  array   $vars            An array or arrays or objects
 	 * @param  string  $field           The field to get values from
 	 * @param  boolean $preserve_keys   Whether or not to preserve the array keys
 	 * @return array
 	 */
-	public static function pluck( $vars, $field, $perserve_keys = true ) {
+	public static function pluck( $vars, $field, $preserve_keys = true ) {
 		$values = [];
 	    foreach( $vars as $k => $v ) {
-	        if( is_object($v) && isset($v->{$field}) ) {
-		    	$values[$k] = $v->{$field};
-	        }
-	        elseif( isset($v[$field]) ) {
-	            $values[$k] = $v[$field];
-	        }
+	    	$values[$k] = static::get($v, $field);
 	    }
-	    return $perserve_keys ? $values : array_values($values);
+	    return $preserve_keys ? $values : array_values($values);
 	}
 
 	/**

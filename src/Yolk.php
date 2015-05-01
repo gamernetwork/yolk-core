@@ -23,22 +23,34 @@ class Yolk {
 	const DUMP_HTML     = 'html';
 	const DUMP_TERMINAL = 'terminal';
 
+	/**
+	 * The debug mode flag.
+	 * @var boolean
+	 */
 	protected static $debug;
-
-	protected static $start_time;
-
-	protected static $start_memory;
 
 	/**
 	 * Current error handler.
-	 * @var array|\Closure
+	 * @var callable
 	 */
-	protected static $error_handler = [__CLASS__, 'error'];
+	protected static $error_handler = ['\\yolk\\exceptions\\Handler', 'error'];
 
-	protected static $exception_handler;
+	/**
+	 * Current exception handler.
+	 * @var callable
+	 */
+	protected static $exception_handler = ['\\yolk\\exceptions\\Handler', 'exception'];
 
+	/**
+	 * The error page to display for production web apps.
+	 * @var string
+	 */
 	protected static $error_page;
 
+	/**
+	 * Array of helper methods accessable as static method on this class.
+	 * @var array
+	 */
 	protected static $helpers = [];
 
 	/**
@@ -71,6 +83,38 @@ class Yolk {
 		static::$debug = (bool) $debug;
 	}
 
+	/**
+	 * Pretty-print a variable - if running in debug mode.
+	 * @param  mixed $var
+	 * @param  string $format one of the Yolk::DUMP_* constants
+	 * @return void
+	 */
+	public static function dump( $var, $format = null ) {
+
+		if( !static::isDebug() )
+			return;
+
+		$dumpers = [
+			static::DUMP_HTML     => '\\yolk\\debug\\HTMLDumper',
+			static::DUMP_TERMINAL => '\\yolk\\debug\\TerminalDumper',
+			static::DUMP_TEXT     => '\\yolk\\debug\\TextDumper',
+		];
+
+		// auto-detect format if unknown or none specified
+		if( !isset($dumpers[$format]) )
+			$format = static::isCLI() ? static::DUMP_TERMINAL : static::DUMP_HTML;
+
+		$dumpers[$format]::dump($var);
+
+	}
+
+	/**
+	 * Register one or multiple static helper classes.
+	 * Static methods defined within each class will become statically callable
+	 * via the Yolk object.
+	 * .e.g yolk\helpers\ArrayHelper::sum() -> yolk\Yolk::sum()
+	 * @param  string|array $classes
+	 */
 	public static function registerHelpers( $classes ) {
 
 		if( !is_array($classes) )
@@ -82,15 +126,28 @@ class Yolk {
 			$methods = $class->getMethods(\ReflectionMethod::IS_PUBLIC | \ReflectionMethod::IS_STATIC);
 
 			foreach( $methods as $m ) {
-				$k = strtolower($m->name);
-				if( method_exists(__CLASS__, $m->name) )
-					throw new \Exception(sprintf("Helper methods cannot override pre-defined Yolk methods - '%s' is reserved", $m->name));
-				elseif( isset(static::$helpers[$k]) && static::$helpers[$k][0] != $class->name )
-					throw new \Exception(sprintf("Helper method '%s' already defined in class '%s', duplicate in '%s'", $m->name, static::$helpers[$k][0], $class->name));
-				static::$helpers[$k] = [$class->name, $m->name];
+				static::addHelperMethod($class->name, $m->name);
 			}
 			
 		}
+
+	}
+
+	/**
+	 * Register a single static method as a helper.
+	 * @param string $class
+	 * @param string $method
+	 */
+	public static function addHelperMethod( $class, $method ) {
+
+		$k = strtolower($method);
+
+		if( method_exists(__CLASS__, $method) )
+			throw new \Exception(sprintf("Helper methods cannot override pre-defined Yolk methods - '%s' is reserved", $method));
+		elseif( isset(static::$helpers[$k]) && static::$helpers[$k][0] != $class->name )
+			throw new \Exception(sprintf("Helper method '%s' already defined in class '%s', duplicate in '%s'", $method, static::$helpers[$k][0], $class));
+
+		static::$helpers[$k] = [$class, $method];
 
 	}
 
@@ -101,57 +158,23 @@ class Yolk {
 	 */
 	public static function run( Callable $callable ) {
 
-		static::$start_time   = microtime(true);
-		static::$start_memory = memory_get_usage();
-
 		try {
 
 			// catch fatal errors
-			register_shutdown_function([__CLASS__, 'shutdown']);
+			register_shutdown_function(['\\yolk\\exceptions\\Handler', 'checkFatal']);
 
-			// set an error handler
+			// use our error handler
 			$error_handler = set_error_handler(static::$error_handler);
 
 			$args = func_get_args();
 			array_shift($args);
 
-			if( ($callable instanceof \Closure) || is_string($callable) || is_object($callable) ) {
-				switch( count($args) ) {
-					case 0:
-						$result = $callable();
-						break;
-					case 1:
-						$result = $callable($args[0]);
-						break;
-					case 2:
-						$result = $callable($args[0], $args[1]);
-						break;
-					case 3:
-						$result = $callable($args[0], $args[1], $args[2]);
-						break;
-					default:
-						$result = call_user_func_array($callable, $args);
-						break;
-				}
-			}
-			elseif( is_array($callable) && is_object($callable[0]) ) {
-				$method = new \ReflectionMethod($callable[0], $callable[1]);
-				$result = $method->invokeArgs($callable[0], $args);
-			}
-			else {
-				$result = call_user_func_array($callable, $args);
-			}
-
-			// if $error_handler is null then passing it to set_error_handler() will fail on PHP < v5.5
-			// so we create an empty error handler thereby causing PHP to run it's own handler.
-			if( !$error_handler ) {
-				$error_handler = function( $severity, $message, $file, $line ) {
-			      return false;
-			   };
-			}
+			$result = call_user_func_array($callable, $args);
 
 			// restore the original error handler
-			set_error_handler($error_handler);
+			// if $error_handler is null then passing it to set_error_handler() will fail on PHP < v5.5
+			// so we create an empty error handler thereby causing PHP to run it's own handler.
+			set_error_handler($error_handler ?: function() { return false; });
 
 			return $result;
 
@@ -162,47 +185,51 @@ class Yolk {
 
 	}
 
-	public static function dump( $var, $format = null ) {
-
-		switch( $format ) {
-			/*case null:
-				$format = static::isCLI() ? static::DUMP_TERMINAL : static::DUMP_HTML;
-				// fall through now we've selected an appropriate format
-			case static::DUMP_HTML:
-				$dumper = '\\yolk\\debug\\HTMLDumper';
-				break;
-			case static::DUMP_TERMINAL:
-				$dumper = '\\yolk\\debug\\TerminalDumper';
-				break;*/
-			case static::DUMP_TEXT:
-			default:
-				$dumper = '\\yolk\\debug\\TextDumper';
-				break;
-		}
-
-		$dumper::dump($var);
-
-	}
-
 	/**
 	 * Specifies the function to execute in the event of an error being triggered during a call to Yolk::run().
-	 * @param Callable  $handler
+	 * @param callable $handler
 	 * @return void
 	 */
-	public static function setErrorHandler( Callable $handler = null ) {
+	public static function setErrorHandler( callable $handler = null ) {
+
 		if( !$handler )
-			static::$error_handler = [__CLASS__, 'error'];
-		else
-			static::$error_handler = $handler;
+			$handler = ['\\yolk\\exceptions\\Handler', 'error'];
+
+		if( !is_callable($handler) )
+			throw new \InvalidArgumentException("Specified error handler is not callable.");
+
+		static::$error_handler = $handler;
+
 	}
 
 	/**
 	 * Specifies the function to execute in the event of an exception being thrown during a call to Yolk::run().
-	 * @param Callable  $handler
+	 * @param callable $handler
 	 * @return void
 	 */
-	public static function setExceptionHandler( Callable $handler = null ) {
+	public static function setExceptionHandler( callable $handler = null ) {
+		
+		if( !$handler )
+			$handler = ['\\yolk\\exceptions\\Handler', 'exception'];
+
+		if( !is_callable($handler) )
+			throw new \InvalidArgumentException("Specified exception handler is not callable.");
+
 		static::$exception_handler = $handler;
+
+	}
+
+	/**
+	 * Call the registered exception handler.
+	 * @param  \Exception $error
+	 * @return void
+	 */
+	public static function exception( \Exception $error ) {
+		return call_user_func(
+			static::$exception_handler,
+			$error,
+			static::$error_page ?: __DIR__. '/exceptions/error.php'
+		);
 	}
 
 	/**
@@ -213,76 +240,6 @@ class Yolk {
 	 */
 	public static function setErrorPage( $file ) {
 		static::$error_page = (string) $file;
-	}
-
-	/**
-	 * Default error handler.
-	 * @param int     $severity   the error level (http://php.net/manual/en/errorfunc.constants.php)
-	 * @param string  $message
-	 * @param string  $file
-	 * @param int     $line
-	 * @return void
-	 */
-	public static function error( $severity, $message, $file, $line ) {
-
-		// if the error was a type hint failure then throw an InvalidArgumentException instead
-		if( preg_match('/^Argument (\d+) passed to ([\w\\\\]+)::(\w+)\(\) must be an instance of ([\w\\\\]+), ([\w\\\\]+) given, called in ([\w\s\.\/_-]+) on line (\d+)/', $message, $m) ) {
-			throw new \InvalidArgumentException("Argument {$m[1]} to {$m[2]}::{$m[3]}() should be an instance of {$m[4]}, {$m[5]} given", $severity, new \ErrorException($message, 0, $severity, $m[6], $m[7]));
-		}
-		// convert the error to an exception
-		else {
-			throw new \ErrorException($message, 0, $severity, $file, $line);
-		}
-
-	}
-
-	/**
-	 * Default exception handler
-	 * @param \Exception  $error
-	 * @return void
-	 */
-	public static function exception( \Exception $error ) {
-
-		// run the user defined exception handler if we have one
-		if( $handler = static::$exception_handler )
-			return call_user_func($handler, $error);
-		
-		$fatal = ($error instanceof \ErrorException) && ($error->getSeverity() & (E_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR));
-
-		// fatal errors will already have been error_log()'d
-		if( !$fatal ) {
-			// type hinting error - make sure we give the correct location
-			if( ($error instanceof \InvalidArgumentException) && ($error->getPrevious() instanceof \ErrorException) )
-				$location = $error->getPrevious()->getFile(). ':'. $error->getPrevious()->getLine();
-			else
-				$location = $error->getFile(). ':'. $error->getLine();
-			error_log(get_class($error). ': '. $error->getMessage(). " [{$location}]");
-		}
-
-		if( static::isCLI() ) {
-			static::isDebug() && static::dump($error);
-		}
-		// debug web app
-		elseif( static::isDebug() ) {
-			require __DIR__. '/exceptions/error.debug.php';
-		}
-		// production web app
-		else {
-			require static::$error_page ?: __DIR__. '/exceptions/error.php';;
-		}
-
-	}
-
-	/**
-	 * Shutdown function to catch fatal errors.
-	 * @return void
-	 */
-	public static function shutdown() {
-		$flags = E_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR;
-		$fatal = ($error = error_get_last()) && ($flags & $error['type']);
-		if( $fatal ) {
-			static::exception(new \ErrorException($error['message'], 0, $error['type'], $error['file'], $error['line']));
-		}
 	}
 
 	public static function __callStatic( $method, array $args = [] ) {
