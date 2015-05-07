@@ -144,7 +144,7 @@ class Yolk {
 
 		if( method_exists(__CLASS__, $method) )
 			throw new \Exception(sprintf("Helper methods cannot override pre-defined Yolk methods - '%s' is reserved", $method));
-		elseif( isset(static::$helpers[$k]) && static::$helpers[$k][0] != $class->name )
+		elseif( isset(static::$helpers[$k]) && static::$helpers[$k][0] != $class )
 			throw new \Exception(sprintf("Helper method '%s' already defined in class '%s', duplicate in '%s'", $method, static::$helpers[$k][0], $class));
 
 		static::$helpers[$k] = [$class, $method];

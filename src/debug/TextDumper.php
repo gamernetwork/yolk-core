@@ -15,6 +15,8 @@ class TextDumper extends AbstractDumper {
 
 	protected static $depth = 0;
 
+	protected static $stack = [];
+
 	public static function dumpNull() {
 		return 'null';
 	}
@@ -58,6 +60,11 @@ class TextDumper extends AbstractDumper {
 		if( $obj instanceof \Exception )
 			return static::dumpException($obj);
 
+		elseif( $item = static::recursionCheck($obj) )
+			return $item;
+
+		static::$stack[] = $obj;
+
 		// we use reflection to access all the object's properties (public, protected and private)
 		$r = new \ReflectionClass($obj);
 
@@ -71,6 +78,8 @@ class TextDumper extends AbstractDumper {
 		$item .= str_repeat("\t", static::$depth - 1). "}";
 
 		static::$depth--;
+
+		array_pop(static::$stack);
 
 		return $item;
 		
@@ -202,6 +211,18 @@ class TextDumper extends AbstractDumper {
 		}
 
 		return $properties;
+
+	}
+
+	protected static function recursionCheck( $obj ) {
+
+		if( end(static::$stack) === $obj )
+			return '**SELF**';
+
+		elseif( in_array($obj, static::$stack) )
+			return '**RECURSION**';
+
+		return '';
 
 	}
 
