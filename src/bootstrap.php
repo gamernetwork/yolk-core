@@ -4,11 +4,13 @@ use yolk\Yolk;
 
 if( !function_exists('d') ) {
 	function d() {
+		$args = func_get_args();
 		if( Yolk::isDebug() ) {
-			foreach( func_get_args() as $arg ) {
+			foreach( $args as $arg ) {
 				Yolk::dump($arg);
 			}
 		}
+		return array_shift($args);
 	}
 	function dd() {
 		if( Yolk::isDebug() ) {
