@@ -461,7 +461,7 @@ class StringHelper {
 	 * All line-ending are converted to LF with maximum of two consecutive.
 	 * @return string
 	 */
-	public static function normaliseLineEndings() {
+	public static function normaliseLineEndings( $str ) {
 		$str = str_replace("\r\n", "\n", $str);
 		$str = str_replace("\r", "\n", $str);
 		return preg_replace("/\n{2,}/", "\n\n", $str);
