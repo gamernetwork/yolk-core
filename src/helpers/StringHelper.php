@@ -401,8 +401,7 @@ class StringHelper {
 		$str = static::stripControlChars($str);
 
 		// normalise line endings
-		$str = str_replace("\r\n", "\n", $str);
-		$str = str_replace("\r", "\n", $str);
+		$str = static::normaliseLineEndings($str);
 
 		// remove any attribute starting with "on" or xmlns
 		$str = preg_replace('#(?:on[a-z]+|xmlns)\s*=\s*[\'"\s]?[^\'>"]*[\'"\s]?\s?#iu', '', $str);
@@ -455,6 +454,17 @@ class StringHelper {
 
 		return $str;
 
+	}
+
+	/**
+	 * Ensures that a string has consistent line-endings.
+	 * All line-ending are converted to LF with maximum of two consecutive.
+	 * @return string
+	 */
+	public static function normaliseLineEndings() {
+		$str = str_replace("\r\n", "\n", $str);
+		$str = str_replace("\r", "\n", $str);
+		return preg_replace("/\n{2,}/", "\n\n", $str);
 	}
 
 	// TODO: cache results to speed up subsequent use?
