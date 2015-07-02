@@ -192,7 +192,6 @@ class Yolk {
 	 */
 	public static function setErrorHandler( callable $handler = null ) {
 		static::$error_handler = $handler ?: ['\\yolk\\exceptions\\Handler', 'error'];
-
 	}
 
 	/**
@@ -202,7 +201,6 @@ class Yolk {
 	 */
 	public static function setExceptionHandler( callable $handler = null ) {
 		static::$exception_handler = $handler ?: ['\\yolk\\exceptions\\Handler', 'exception'];
-
 	}
 
 	/**
