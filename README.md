@@ -5,8 +5,6 @@
 The lightweight core of Gamer Network's PHP framework. Provides error and exception handling and commonly used helper
 functions.
 
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/gamernetwork/yolk-core/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/gamernetwork/yolk-core/?branch=master)
-
 ## Requirements
 
 This library requires only PHP 5.4 or later and the Yolk Contracts package (```gamernetwork/yolk-contracts```).
