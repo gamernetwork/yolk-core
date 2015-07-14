@@ -65,16 +65,12 @@ class TextDumper extends AbstractDumper {
 
 		static::$stack[] = $obj;
 
-		// we use reflection to access all the object's properties (public, protected and private)
-		$r = new \ReflectionClass($obj);
-
 		static::$depth++;
 
 		$item = get_class($obj). " {\n";
-		foreach( $r->getProperties() as $p ) {
-			$p->setAccessible(true);
-			$item .= sprintf("%s%s: %s\n", str_repeat("\t", static::$depth), $p->name, static::dump($p->getValue($obj), false));
-		}
+
+		$item .= static::dumpObjectProperties($obj);
+
 		$item .= str_repeat("\t", static::$depth - 1). "}";
 
 		static::$depth--;
@@ -82,7 +78,7 @@ class TextDumper extends AbstractDumper {
 		array_pop(static::$stack);
 
 		return $item;
-		
+
 	}
 
 	public static function dumpException( \Exception $e ) {
@@ -200,17 +196,19 @@ class TextDumper extends AbstractDumper {
 
 	}
 
-	protected static function getProperties( \ReflectionClass $r, $obj ) {
-		
-		$properties = [];
+	protected static function dumpObjectProperties( $obj ) {
+
+		// we use reflection to access all the object's properties (public, protected and private)
+		$r = new \ReflectionClass($obj);
+
+		$item = '';
 
 		foreach( $r->getProperties() as $p ) {
 			$p->setAccessible(true);
-			$v = $p->getValue($obj);
-			$properties[$p->name] = $v;
+			$item .= sprintf("%s%s: %s\n", str_repeat("\t", static::$depth), $p->name, static::dump($p->getValue($obj), false));
 		}
 
-		return $properties;
+		return $item;
 
 	}
 

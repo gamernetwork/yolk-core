@@ -42,14 +42,7 @@ class Handler {
 	 */
 	public static function exception( \Exception $error, $error_page ) {
 
-		// fatal errors will already have been error_log()'d
-		if( !static::isFatal($error) ) {
-			$location = $error->getFile(). ':'. $error->getLine();
-			// type hinting error - make sure we give the correct location
-			if( ($error instanceof \InvalidArgumentException) && ($error->getPrevious() instanceof \ErrorException) )
-				$location = $error->getPrevious()->getFile(). ':'. $error->getPrevious()->getLine();
-			error_log(get_class($error). ': '. $error->getMessage(). " [{$location}]");
-		}
+		static::logException($error);
 
 		if( Yolk::isCLI() ) {
 			Yolk::dump($error);
@@ -83,15 +76,33 @@ class Handler {
 	 */
 	protected static function isFatal( $error ) {
 
+		if( $error instanceof \Exception )
+			return false;
+
 		$fatal = E_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR;
 
 		if( $error instanceof \ErrorException )
 			$error = $error->getSeverity();
 
-		elseif( $error instanceof \Exception )
-			return false;
+		return (bool) ($error & $fatal);
 
-		return $error & $fatal;
+	}
+
+	/**
+	 * Log an exception to the error log.
+	 * @param \Exception $error
+	 * @return void
+	 */
+	protected static function logException( \Exception $error ) {
+
+		// fatal errors will already have been error_log()'d
+		if( !static::isFatal($error) ) {
+			$location = $error->getFile(). ':'. $error->getLine();
+			// type hinting error - make sure we give the correct location
+			if( ($error instanceof \InvalidArgumentException) && ($error->getPrevious() instanceof \ErrorException) )
+				$location = $error->getPrevious()->getFile(). ':'. $error->getPrevious()->getLine();
+			error_log(get_class($error). ': '. $error->getMessage(). " [{$location}]");
+		}
 
 	}
 

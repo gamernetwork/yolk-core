@@ -233,22 +233,7 @@ class Yolk {
 		if( !isset(static::$helpers[$k]) )
 			throw new \BadMethodCallException("Unknown helper method '$method'");
 
-		list($class, $method) = static::$helpers[$k];
-		
-		switch( count($args) ) {
-			case 0:
-				return $class::$method();
-			case 1:
-				return $class::$method($args[0]);
-			case 2:
-				return $class::$method($args[0], $args[1]);
-			case 3:
-				return $class::$method($args[0], $args[1], $args[2]);
-			case 4:
-				return $class::$method($args[0], $args[1], $args[2], $args[3]);
-			default:
-				return call_user_func_array([$class, $method], $args);
-		}
+		return call_user_func_array(static::$helpers[$k], $args);
 
 	}
 

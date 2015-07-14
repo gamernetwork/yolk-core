@@ -17,34 +17,30 @@ abstract class AbstractDumper implements DumperInterface {
 
 	public static function dump( $var, $output = true ) {
 
-		if( $var === null ) {
-			$item = static::dumpNull();
+		$dumpers = [
+			'is_null'     => 'dumpNull',
+			'is_bool'     => 'dumpBoolean',
+			'is_integer'  => 'dumpInteger',
+			'is_float'    => 'dumpFloat',
+			'is_string'   => 'dumpString',
+			'is_array'    => 'dumpArray',
+			'is_object'   => 'dumpObject',
+			'is_resource' => 'dumpResource',
+		];
+
+		$item = false;
+
+		foreach( $dumpers as $test => $dumper ) {
+			if( $test($var) ) {
+				$item = static::$dumper($var);
+				break;
+			}
 		}
-		elseif( is_bool( $var ) ) {
-			$item = static::dumpBoolean($var);
-		}
-		elseif( is_integer( $var ) ) {
-			$item = static::dumpInteger($var);
-		}
-		elseif( is_float( $var ) ) {
-			$item = static::dumpFloat($var);
-		}
-		elseif( is_string( $var ) ) {
-			$item = static::dumpString($var);
-		}
-		elseif( is_array($var) ) {
-			$item = static::dumpArray($var);
-		}
-		elseif( is_object($var) ) {
-			$item = static::dumpObject($var);
-		}
-		elseif( is_resource($var) ) {
-			$item = static::dumpResource($var);
-		}
-		else {
+
+		if( !$item ) {
 			ob_start();
 			var_dump($var);
-			$item = ob_get_clean();   
+			$item = ob_get_clean();
 		}
 
 		if( $output )
