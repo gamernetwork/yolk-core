@@ -34,7 +34,7 @@ class TextDumper extends AbstractDumper {
 	}
 
 	public static function dumpString( $str ) {
-		$enc = mb_detect_encoding($str);
+		$enc = mb_detect_encoding($str, ['UTF-8', 'WINDOWS-1252', 'ISO-8859-1', 'ASCII'], true);
 		$enc = ($enc == 'ASCII') ? '' : "; $enc";
 		return sprintf('string(%d%s) "%s"', strlen($str), $enc, $str);
 	}
