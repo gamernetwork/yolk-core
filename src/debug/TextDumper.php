@@ -199,7 +199,7 @@ class TextDumper extends AbstractDumper {
 	protected static function dumpObjectProperties( $obj ) {
 
 		// we use reflection to access all the object's properties (public, protected and private)
-		$r = new \ReflectionClass($obj);
+		$r = new \ReflectionObject($obj);
 
 		$item = '';
 
