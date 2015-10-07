@@ -11,6 +11,8 @@
 
 namespace yolk\debug;
 
+use yolk\contracts\support\Dumpable;
+
 class TextDumper extends AbstractDumper {
 
 	protected static $depth = 0;
@@ -57,11 +59,16 @@ class TextDumper extends AbstractDumper {
 
 	public static function dumpObject( $obj ) {
 
-		if( $obj instanceof \Exception )
-			return static::dumpException($obj);
-
-		elseif( $item = static::recursionCheck($obj) )
+		if( $item = static::recursionCheck($obj) ) {
 			return $item;
+		}
+		elseif( $obj instanceof Dumpable ) {
+			$item = $obj->dump(get_called_class(), static::$depth + 1);
+			if( $item )
+				return $item;
+		}
+		elseif( $obj instanceof \Exception )
+			return static::dumpException($obj);
 
 		static::$stack[] = $obj;
 
