@@ -25,8 +25,12 @@ class Handler {
 	 */
 	public static function error( $severity, $message, $file, $line ) {
 
+		// Latest Twig raises a warning when accessing missing cached views - we can ignore it
+		if( preg_match('/filemtime/', $message) )
+			return;
+
 		// if the error was a type hint failure then throw an InvalidArgumentException instead
-		if( preg_match('/^Argument (\d+) passed to ([\w\\\\]+)::(\w+)\(\) must be an instance of ([\w\\\\]+), ([\w\\\\]+) given, called in ([\w\s\.\/_-]+) on line (\d+)/', $message, $m) )
+		elseif( preg_match('/^Argument (\d+) passed to ([\w\\\\]+)::(\w+)\(\) must be an instance of ([\w\\\\]+), ([\w\\\\]+) given, called in ([\w\s\.\/_-]+) on line (\d+)/', $message, $m) )
 			throw new \InvalidArgumentException("Argument {$m[1]} to {$m[2]}::{$m[3]}() should be an instance of {$m[4]}, {$m[5]} given", $severity, new \ErrorException($message, 0, $severity, $m[6], $m[7]));
 
 		// convert the error to an exception
