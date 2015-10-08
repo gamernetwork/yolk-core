@@ -3,7 +3,7 @@
  * This file is part of Yolk - Gamer Network's PHP Framework.
  *
  * Copyright (c) 2013 Gamer Network Ltd.
- * 
+ *
  * Distributed under the MIT License, a copy of which is available in the
  * LICENSE file that was bundled with this package, or online at:
  * https://github.com/gamernetwork/yolk-core
@@ -210,12 +210,30 @@ class TextDumper extends AbstractDumper {
 
 		$item = '';
 
-		foreach( $r->getProperties() as $p ) {
+		foreach( static::getClassProperties($r) as $p ) {
 			$p->setAccessible(true);
 			$item .= sprintf("%s%s: %s\n", str_repeat("\t", static::$depth), $p->name, static::dump($p->getValue($obj), false));
 		}
 
 		return $item;
+
+	}
+
+	protected static function getClassProperties( \ReflectionClass $class ) {
+
+		$properties = [];
+
+	    foreach( $class->getProperties() as $property ) {
+	        $properties[$property->getName()] = $property;
+	    }
+
+	    if( $parent = $class->getParentClass() ) {
+	        $parent_props = static::getClassProperties($parent);
+	        if(count($parent_props) > 0)
+	            $properties = array_merge($parent_props, $properties);
+	    }
+
+	    return $properties;
 
 	}
 
