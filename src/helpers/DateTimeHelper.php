@@ -18,7 +18,7 @@ class DateTimeHelper {
 	 * @param  mixed $time
 	 * @return integer
 	 */
-	protected function makeTimestamp( $time ) {
+	public function makeTimestamp( $time ) {
 
 		if( is_numeric($time) )
 			return (int) $time;
