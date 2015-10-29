@@ -14,8 +14,12 @@ namespace yolk;
 // global helper functions (e.g. d() and dd())
 require __DIR__.'/bootstrap.php';
 
-Yolk::registerHelpers('yolk\\helpers\\ArrayHelper');
-Yolk::registerHelpers('yolk\\helpers\\StringHelper');
+Yolk::registerHelpers([
+	'yolk\\helpers\\ArrayHelper',
+	'yolk\\helpers\\StringHelper',
+	'yolk\\helpers\\DateTimeHelper',
+	'yolk\\helpers\\Inflector',
+]);
 
 class Yolk {
 

@@ -11,87 +11,7 @@
 
 namespace yolk\helpers;
 
-/**
- *
- * Inflector implementation from: http://subosito.com/inflector-in-symfony-2
- */
 class StringHelper {
-
-	protected static $plural = array(
-		'/(quiz)$/i'               => "$1zes",
-		'/^(ox)$/i'                => "$1en",
-		'/([m|l])ouse$/i'          => "$1ice",
-		'/(matr|vert|ind)ix|ex$/i' => "$1ices",
-		'/(x|ch|ss|sh)$/i'         => "$1es",
-		'/([^aeiouy]|qu)y$/i'      => "$1ies",
-		'/(hive)$/i'               => "$1s",
-		'/(?:([^f])fe|([lr])f)$/i' => "$1$2ves",
-		'/(shea|lea|loa|thie)f$/i' => "$1ves",
-		'/sis$/i'                  => "ses",
-		'/([ti])um$/i'             => "$1a",
-		'/(tomat|potat|ech|her|vet)o$/i'=> "$1oes",
-		'/(bu)s$/i'                => "$1ses",
-		'/(alias)$/i'              => "$1es",
-		'/(octop)us$/i'            => "$1i",
-		'/(ax|test)is$/i'          => "$1es",
-		'/(us)$/i'                 => "$1es",
-		'/s$/i'                    => "s",
-		'/$/'                      => "s"
-	);
-
-	protected static $singular = array(
-		'/(quiz)zes$/i'             => "$1",
-		'/(matr)ices$/i'            => "$1ix",
-		'/(vert|ind)ices$/i'        => "$1ex",
-		'/^(ox)en$/i'               => "$1",
-		'/(alias)es$/i'             => "$1",
-		'/(octop|vir)i$/i'          => "$1us",
-		'/(cris|ax|test)es$/i'      => "$1is",
-		'/(shoe)s$/i'               => "$1",
-		'/(o)es$/i'                 => "$1",
-		'/(bus)es$/i'               => "$1",
-		'/([m|l])ice$/i'            => "$1ouse",
-		'/(x|ch|ss|sh)es$/i'        => "$1",
-		'/(m)ovies$/i'              => "$1ovie",
-		'/(s)eries$/i'              => "$1eries",
-		'/([^aeiouy]|qu)ies$/i'     => "$1y",
-		'/([lr])ves$/i'             => "$1f",
-		'/(tive)s$/i'               => "$1",
-		'/(hive)s$/i'               => "$1",
-		'/(li|wi|kni)ves$/i'        => "$1fe",
-		'/(shea|loa|lea|thie)ves$/i'=> "$1f",
-		'/(^analy)ses$/i'           => "$1sis",
-		'/((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$/i'  => "$1$2sis",
-		'/([ti])a$/i'               => "$1um",
-		'/(n)ews$/i'                => "$1ews",
-		'/(h|bl)ouses$/i'           => "$1ouse",
-		'/(corpse)s$/i'             => "$1",
-		'/(us)es$/i'                => "$1",
-		'/s$/i'                     => ""
-	);
-
-	protected static $irregular = array(
-		'move'   => 'moves',
-		'foot'   => 'feet',
-		'goose'  => 'geese',
-		'sex'    => 'sexes',
-		'child'  => 'children',
-		'man'    => 'men',
-		'tooth'  => 'teeth',
-		'person' => 'people'
-	);
-
-	protected static $uncountable = array(
-		'sheep',
-		'fish',
-		'deer',
-		'series',
-		'species',
-		'money',
-		'rice',
-		'information',
-		'equipment'
-	);
 
 	/**
 	 * Helpers cannot be instantiated.
@@ -308,66 +228,6 @@ class StringHelper {
 	}
 
 	/**
-	 * Converts a string representation containing one or more of hours, minutes and seconds into a total number of seconds.
-	 * e.g. seconds("3 hours 4 minutes 10 seconds"), seconds("5min"), seconds("4.5h")
-	 *
-	 * @param  string  $str   string to convert
-	 * @return integer|float
-	 */
-	public static function seconds( $str ) {
-
-		$hours   = 0;
-		$minutes = 0;
-		$seconds = 0;
-
-		if( preg_match('/^\d+:\d+$/', $str) ) {
-			list(, $minutes, $seconds) = explode(':', $str);
-		}
-		elseif( preg_match('/^\d+:\d+:\d+$/', $str) ) {
-			list($hours, $minutes, $seconds) = explode(':', $str);
-		}
-		else {
-
-			// convert invalid characters to spaces
-			$str = preg_replace('/[^a-z0-9. ]+/iu', ' ', $str);
-
-			// strip multiple spaces
-			$str = preg_replace('/ {2,}/u', ' ', $str);
-
-			// compress scales and units together so '2 hours' => '2hours'
-			$str = preg_replace('/([0-9.]+) ([cdehimnorstu]+)/u', '$1$2', $str);
-
-			foreach( explode(' ', $str) as $item ) {
-
-				if( !preg_match('/^([0-9.]+)([cdehimnorstu]+)$/u', $item, $m) )
-					return false;
-
-				list(, $scale, $unit) = $m;
-
-				$scale = ((float) $scale != (int) $scale) ? (float) $scale : (int) $scale;
-
-				if( preg_match('/^h(r|our|ours)?$/u', $unit) && !$hours ) {
-					$hours = $scale;
-				}
-				elseif( preg_match('/^m(in|ins|inute|inutes)?$/u', $unit) && !$minutes ) {
-					$minutes = $scale;
-				}
-				elseif( preg_match('/^s(ec|ecs|econd|econds)?$/u', $unit) && !$seconds ) {
-					$seconds = $scale;
-				}
-				else {
-					return false;
-				}
-
-			}
-
-		}
-
-		return ($hours * 3600) + ($minutes * 60) + $seconds;
-
-	}
-
-	/**
 	 * Remove XSS vulnerabilities from a string.
 	 * Shamelessly ripped from Kohana v2 and then tweaked to remove control characters
 	 * and replace the associated regex components with \s instead.
@@ -465,58 +325,6 @@ class StringHelper {
 		$str = str_replace("\r\n", "\n", $str);
 		$str = str_replace("\r", "\n", $str);
 		return preg_replace("/\n{2,}/", "\n\n", $str);
-	}
-
-	// TODO: cache results to speed up subsequent use?
-	public static function pluralise( $string ) {
-
-		// save some time in the case that singular and plural are the same
-		if ( in_array( mb_strtolower( $string ), self::$uncountable ) )
-			return $string;
-
-
-		// check for irregular singular forms
-		foreach ( self::$irregular as $pattern => $result )
-		{
-			$pattern = '/' . $pattern . '$/iu';
-
-			if ( preg_match( $pattern, $string ) )
-				return preg_replace( $pattern, $result, $string);
-		}
-
-		// check for matches using regular expressions
-		foreach ( self::$plural as $pattern => $result )
-		{
-			if ( preg_match( $pattern, $string ) )
-				return preg_replace( $pattern, $result, $string );
-		}
-
-		return $string;
-
-	}
-
-	// TODO: cache results to speed up subsequent use?
-	public static function singularise( $string ) {
-
-		// save some time in the case that singular and plural are the same
-		if ( in_array(mb_strtolower($string), self::$uncountable) )
-			return $string;
-
-		// check for irregular plural forms
-		foreach( self::$irregular as $result => $pattern ) {
-			$pattern = '/' . $pattern . '$/iu';
-			if( preg_match($pattern, $string) )
-				return preg_replace($pattern, $result, $string);
-		}
-
-		// check for matches using regular expressions
-		foreach( self::$singular as $pattern => $result ) {
-			if( preg_match($pattern, $string) )
-				return preg_replace($pattern, $result, $string);
-		}
-
-		return $string;
-
 	}
 
 }
