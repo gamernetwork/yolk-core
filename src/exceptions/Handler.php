@@ -44,9 +44,10 @@ class Handler {
 	 * @param string     $error_page   the file containing the error page to include for production web apps
 	 * @return void
 	 */
-	public static function exception( \Exception $error, $error_page ) {
+	public static function exception( \Exception $error, $error_page, $log = true ) {
 
-		static::logException($error);
+		if( $log )
+			static::logException($error);
 
 		if( Yolk::isCLI() ) {
 			Yolk::dump($error);
