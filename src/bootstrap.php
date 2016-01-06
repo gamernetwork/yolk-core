@@ -2,6 +2,9 @@
 
 use yolk\Yolk;
 
+defined('YOLK_START_TIME') || define('YOLK_START_TIME', microtime(true));
+defined('YOLK_START_MEM')  || define('YOLK_START_MEM', memory_get_usage());
+
 if( !function_exists('d') ) {
 	function d() {
 		$args = func_get_args();
