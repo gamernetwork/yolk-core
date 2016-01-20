@@ -45,7 +45,9 @@ elseif( ($error instanceof \InvalidArgumentException) && ($err['previous'] insta
 	$err['line'] = $err['previous']->getLine();
 }
 
-headers_sent() || header("HTTP/1.0 500 Internal Server Error");
+// it's an error - don't send a 200 code!
+if( http_response_code() == 200 )
+	header("HTTP/1.0 500 Internal Server Error");
 
 ?><!DOCTYPE html>
 <html>
