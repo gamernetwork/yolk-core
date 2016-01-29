@@ -64,6 +64,24 @@ class Handler {
 	}
 
 	/**
+	 * Log an exception to the error log.
+	 * @param \Exception $error
+	 * @return void
+	 */
+	public static function logException( \Exception $error ) {
+
+		// fatal errors will already have been error_log()'d
+		if( !static::isFatal($error) ) {
+			$location = $error->getFile(). ':'. $error->getLine();
+			// type hinting error - make sure we give the correct location
+			if( ($error instanceof \InvalidArgumentException) && ($error->getPrevious() instanceof \ErrorException) )
+				$location = $error->getPrevious()->getFile(). ':'. $error->getPrevious()->getLine();
+			error_log(get_class($error). ': '. $error->getMessage(). " [{$location}]");
+		}
+
+	}
+
+	/**
 	 * Shutdown function to catch fatal errors.
 	 * @return void
 	 */
@@ -90,24 +108,6 @@ class Handler {
 			$error = $error->getSeverity();
 
 		return (bool) ($error & $fatal);
-
-	}
-
-	/**
-	 * Log an exception to the error log.
-	 * @param \Exception $error
-	 * @return void
-	 */
-	protected static function logException( \Exception $error ) {
-
-		// fatal errors will already have been error_log()'d
-		if( !static::isFatal($error) ) {
-			$location = $error->getFile(). ':'. $error->getLine();
-			// type hinting error - make sure we give the correct location
-			if( ($error instanceof \InvalidArgumentException) && ($error->getPrevious() instanceof \ErrorException) )
-				$location = $error->getPrevious()->getFile(). ':'. $error->getPrevious()->getLine();
-			error_log(get_class($error). ': '. $error->getMessage(). " [{$location}]");
-		}
 
 	}
 
