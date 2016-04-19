@@ -95,7 +95,7 @@ Yolk::isDebug();
 
 Usage of the debug flag is left almost entirely to clients. The only uses within the framework are:
 * to determine whether to display a detailed error page (if debug flag is set) or a simple static error page
-* calls to the d() and dd() dump functions are ignored if the debug flag is not set
+* calls to the `d()` and `dd()` dump functions are ignored if the debug flag is not set
 
 The default simple static error page can be overriden: by passing the path and file name to the ```
 ```php
@@ -106,7 +106,7 @@ Yolk::setErrorPage($path_to_file);
 
 ## Variable Dumping
 
-Yolk provides an enhanced var_dump() implementation that can output detailed variable information in plain text, html or terminal (CLI) formats.
+Yolk provides an enhanced `var_dump()` implementation that can output detailed variable information in plain text, html or terminal (CLI) formats.
 
 ```php
 use yolk\Yolk;
@@ -119,6 +119,12 @@ Yolk::dump($var, $format = null);
 ```
 
 If no format or null is specified then Yolk will auto-detect the appropriate output - `DUMP_TERMINAL` will be used within CLI environments and `DUMP_HTML` will be used for web environments.
+
+Yolk will also define two shortcut functions for accessing the variable dumping functionality:
+* `d()` - calls `Yolk::dump()` for each passed argument
+* `dd()` - same as `d()` but will call `die()` once the arguments have been dumped
+
+These shortcut methods do nothing is the debug flag is not set.
 
 ## Helpers
 
