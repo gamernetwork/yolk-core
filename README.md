@@ -1,30 +1,30 @@
 # Yolk Core
 
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/gamernetwork/yolk-core/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/gamernetwork/yolk-core/?branch=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/gamernetwork/yolk-core/badges/quality-score.png?b=develop)](https://scrutinizer-ci.com/g/gamernetwork/yolk-core/?branch=develop)
 
 The lightweight core of Gamer Network's PHP framework. Provides error and exception handling and commonly used helper
 functions.
 
 ## Requirements
 
-This library requires only PHP 5.4 or later and the Yolk Contracts package (```gamernetwork/yolk-contracts```).
+This library requires only PHP 5.4 or later and the Yolk Contracts package (`gamernetwork/yolk-contracts`).
 
 ## Installation
 
-It is installable and autoloadable via Composer as ```gamernetwork/yolk-core```.
+It is installable and autoloadable via Composer as `gamernetwork/yolk-core`.
 
-Alternatively, download a release or clone this repository, and add the \yolk namespace to an autoloader.
+Alternatively, download a release or clone this repository, and add the `\yolk` namespace to an autoloader.
 
 ## License
 
-Yolk Core is open-sourced software licensed under the MIT license
+Yolk Core is open-sourced software licensed under the MIT license.
 
 ## Quick Start
 
 Yolk Core provides a basic exception and error handling wrapper for blocks of code, be they command-line scripts,
 complete web apps or simple functions.
 
-Running code with Yolk is a simple as calling the static `run` method with a `callable` parameter.
+Running code with Yolk is a simple as calling the static `run()` method with a `callable` parameter.
 
 ```php
 use yolk\Yolk;
@@ -74,9 +74,9 @@ You can override the default handlers by passing a callable to the appropriate m
 ```php
 use yolk\Yolk;
 
-Yolk::setErrorHandler( $callback );
+Yolk::setErrorHandler($callback);
 
-Yolk::setExceptionHandler( $callback );
+Yolk::setExceptionHandler($callback);
 ```
 
 ## Debug Flag
@@ -95,7 +95,7 @@ Yolk::isDebug();
 
 Usage of the debug flag is left almost entirely to clients. The only uses within the framework are:
 * to determine whether to display a detailed error page (if debug flag is set) or a simple static error page
-* calls to the d() and dd() dump functions are ignored when the debug flag is not set
+* calls to the d() and dd() dump functions are ignored if the debug flag is not set
 
 The default simple static error page can be overriden: by passing the path and file name to the ```
 ```php
@@ -118,11 +118,11 @@ use yolk\Yolk;
 Yolk::dump($var, $format = null);
 ```
 
-If no format or null is specified then Yolk will auto-detect the appropriate output - DUMP_TERMINAL will be used within CLI environments and DUMP_HTML will be used for web environments.
+If no format or null is specified then Yolk will auto-detect the appropriate output - `DUMP_TERMINAL` will be used within CLI environments and `DUMP_HTML` will be used for web environments.
 
 ## Helpers
 
-Yolk provides a variety of helper functions and more can be easily added. Helper functions are implemented as static class methods and registered by passing the class name to the `Yolk::registerHelper()` method.
+Yolk provides a variety of helper functions and more can be easily added. Helper functions are implemented as static class methods and registered either by passing the class name to the `Yolk::registerHelper()` method (registers all public static methods) or by passing a class and method name to the `Yolk::addHelperMethod()` (registers a single method).
 Once registered helper functions can be called via static method call to `Yolk`.
 
 ```php
@@ -141,7 +141,6 @@ Yolk::registerHelper('\\MyHelper');
 
 Yolk::foo();
 Yolk::bar();
-
 ```
 
 ### General Helpers
@@ -163,6 +162,11 @@ Yolk::bar();
 * `implodeAssoc()` - implode an associative array into an array of key/value pairs
 * `makeComparer()` - create a comparison function for sorting multi-dimensional arrays
 
+### Date/Time Helpers
+
+* `makeTimestamp` - convert a value into a timestamp
+* `seconds()` - convert a string representation containing one or more of hours, minutes and seconds into a total number of seconds
+
 ### String Helpers
 
 * `parseURL()` - parse a url into an array of it's components
@@ -175,8 +179,11 @@ Yolk::bar();
 * `utf8()` - convert a Latin1 (ISO-8859-1) into UTF-8
 * `ordinal()` - return the ordinal suffix (st, nd, rd, th) of a number
 * `sizeFormat()` - convert a number of bytes to a human-friendly string using the largest suitable unit
-* `seconds()` - convert a string representation containing one or more of hours, minutes and seconds into a total number of seconds
+
 * `xssClean()` - remove XSS vulnerabilities from a string
 * `stripControlChars()` - remove control characters from a string
+
+### Inflection Helpers
+
 * `pluralise()` - Determine the plural form of a word (English only)
 * `singularise()` - Determine the single form of a word (English only)
