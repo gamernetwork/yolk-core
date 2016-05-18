@@ -1,3 +1,5 @@
+Want to work for Gamer Network? [We are hiring!](http://www.gamesindustry.biz/jobs/gamer-network)
+
 # Yolk Core
 
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/gamernetwork/yolk-core/badges/quality-score.png?b=develop)](https://scrutinizer-ci.com/g/gamernetwork/yolk-core/?branch=develop)
